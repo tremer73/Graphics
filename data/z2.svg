@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<svg height="400" width="450">
+<circle cx="25" cy="25" r="22" fill="yellow" stroke="orange" opacity="0.2" stroke-width="5"/>
+<rect x="0" y="0" width="30" height="30" stroke="red" stroke-width="2" opacity="0.5" fill="purple"/>
+<text x="100" y="100" fill="yellow" stroke="orange" opacity="0.7" stroke-width="1">Генадий</text>
+<polygon points="50,147.5 87.5,120 122.5,147.5 110,190 65,190" 
+style="fill: blue; fill-opacity:0.7; stroke: black; " />
+<polygon points="75,77.5 77.9,86.1 86.9,86.1 79.7,91.5 
+82.3,100.1 75,95 67.7,100.1 70.3,91.5 
+63.1,86.1 72.1,86.1" 
+style="fill: red; stroke: green;" />  
+</svg>
+
+</body>
+</html>
