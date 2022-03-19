@@ -16,6 +16,7 @@
                 <StackPanel Grid.Row="0" Orientation="Horizontal">
                     <Button Click="BMPLoadImage" Content="Load"/>
                     <Button Click="BMPLoadText" Content="LoadText"/>
+                    <Button Click="BMPUploadText" Content="UploadText"/>
                     <Button Click="BMPOnlyRed" Content="OnlyRed"/>
                     <Button Click="BMPOnlyGreen" Content="OnlyGreen"/>
                     <Button Click="BMPOnlyBlue" Content="OnlyBlue"/>

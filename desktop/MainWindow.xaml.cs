@@ -17,7 +17,6 @@ namespace desktop
         static System.Drawing.Bitmap MainBitmap;
         static Svg.SvgDocument SvgDoc;
         static byte[] Array_bytes;
-        static string Array_bit;
         public MainWindow()
         {
             InitializeComponent();
@@ -60,7 +59,7 @@ namespace desktop
             {
                 return;
             }
-            System.Collections.BitArray barr = new System.Collections.BitArray(Array_bytes);
+            
             if (MainBitmap != null)
             {
                 System.Drawing.Bitmap clone = MainBitmap.Clone() as System.Drawing.Bitmap;
@@ -71,9 +70,45 @@ namespace desktop
                 byte[] rgbValuesSrc = new byte[bytes];
                 byte[] rgbValuesDst = new byte[bytes];
                 System.Runtime.InteropServices.Marshal.Copy(dataSrc.Scan0, rgbValuesSrc, 0, bytes);
-                System.Collections.BitArray barrSrc = new System.Collections.BitArray(rgbValuesSrc);
-                int index = 0;
-                
+                byte[] mass = new byte[Array_bytes.Length * 8];
+                int z = 0;
+                for (int i = 0; i < Array_bytes.Length; i++)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        
+                        mass[z] = Extensions.GetBit(Array_bytes[i], j);
+                        z++;
+                    }
+                }
+                z = 0;
+                for (int y = 0; y < dataSrc.Height; ++y)
+                {
+                    int idx = y * dataSrc.Stride;
+                    for (int x = 0; x < dataSrc.Width; ++x, idx += 3)
+                    {
+
+                        for (int i = 0; i < 3; ++i)
+                        {
+                            if (z < mass.Length)
+                            {
+                                rgbValuesSrc[idx + i] = Extensions.SetBit(rgbValuesSrc[idx + i], 0, mass[z]);
+                                z++;
+                            }
+                            else
+                            {
+                                rgbValuesSrc[idx + i] = Extensions.SetBit(rgbValuesSrc[idx + i], 0, 0);
+                            }
+                        }
+                    }
+                }
+                System.Runtime.InteropServices.Marshal.Copy(rgbValuesSrc, 0, dataDst.Scan0, bytes);
+
+                MainBitmap.UnlockBits(dataSrc);
+                clone.UnlockBits(dataDst);
+
+                imageViewBmp.Source = clone.GetImageSource();
+
 
             }
             else 
@@ -81,6 +116,61 @@ namespace desktop
                 return;
             }
 
+        }
+        private void BMPUploadText(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog ofd = new Microsoft.Win32.OpenFileDialog();
+            bool? ret = ofd.ShowDialog();
+            if (ret.HasValue && ret.Value)
+            {
+                if (MainBitmap != null)
+                {
+                    MainBitmap.Dispose();
+                }
+
+                MainBitmap = System.Drawing.Image.FromFile(ofd.FileName) as System.Drawing.Bitmap;
+                imageViewBmp.Source = MainBitmap.GetImageSource();
+                System.Drawing.Bitmap clone = MainBitmap.Clone() as System.Drawing.Bitmap;
+                System.Drawing.Imaging.BitmapData dataSrc = MainBitmap.LockBits(new System.Drawing.Rectangle(0, 0, MainBitmap.Width, MainBitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, MainBitmap.PixelFormat);
+                System.Drawing.Imaging.BitmapData dataDst = clone.LockBits(new System.Drawing.Rectangle(0, 0, clone.Width, clone.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, clone.PixelFormat);
+                int size = (dataSrc.Height * dataSrc.Width * 3);
+                System.Collections.BitArray barr = new System.Collections.BitArray(size+1000);
+                int bytes = Math.Abs(dataSrc.Stride) * dataSrc.Height;
+                byte[] rgbValuesSrc = new byte[bytes];
+                byte[] rgbValuesDst = new byte[bytes];
+                System.Runtime.InteropServices.Marshal.Copy(dataSrc.Scan0, rgbValuesSrc, 0, bytes);
+                int z = 0;
+                for (int y = 0; y < dataSrc.Height; ++y)
+                {
+                    int idx = y * dataSrc.Stride;
+                    for (int x = 0; x < dataSrc.Width; ++x, idx += 3)
+                    {
+                        
+                        for (int i = 0; i < 3; ++i)
+                        {
+                            barr[z] = Convert.ToBoolean(Extensions.GetBit(rgbValuesSrc[idx + i], 0));
+                            z++;
+                        }
+                    }
+                }
+                string a;
+                byte[] LocalArrayByte = new byte[size];
+                barr.CopyTo(LocalArrayByte, 0);
+                a = Encoding.Default.GetString(LocalArrayByte);
+                string FileText;
+                OpenFileDialog dText = new OpenFileDialog();
+                bool? ret1 = dText.ShowDialog();
+                if (ret1.HasValue && ret1.Value)
+                {
+                    FileText = dText.FileName;
+                }
+                else
+                {
+                    return;
+                }
+                File.WriteAllBytes(FileText, LocalArrayByte);
+
+            }
         }
 
         private void BMPOnlyRed(object sender, RoutedEventArgs e)
